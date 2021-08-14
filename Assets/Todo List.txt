@@ -1,0 +1,13 @@
+- be able to play goldmans saloon on pc, on the web, maybe consoles
+- remake the game from start to finish without the tutorial
+	- movement
+	- guns
+	- enemies
+	- tables
+	- powerups
+	- UI
+	- Animations
+	- Be able to support multiple input types
+	- Main menu
+	- Game End screen
+	- 2 Players
