@@ -1,5 +1,5 @@
 {
-    "name": "DefaultInputActions",
+    "name": "Controls",
     "maps": [
         {
             "name": "Player",
@@ -25,6 +25,14 @@
                     "name": "Fire",
                     "type": "Button",
                     "id": "6c2ab1b8-8984-453a-af3d-a3c78ae1679a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Kick",
+                    "type": "Button",
+                    "id": "c636aed3-869c-406b-b2be-d2cb8e9976cc",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -248,6 +256,17 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a37ab3f4-a9d4-49b4-bd51-63eff584ab24",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Kick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
