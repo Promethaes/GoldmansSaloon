@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NumPlayersScript : MonoBehaviour
+public class NumPlayers : MonoBehaviour
 {
     public TMPro.TextMeshProUGUI textMeshProUIGUI;
     public int numPlayers = 1;

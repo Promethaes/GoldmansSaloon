@@ -14,3 +14,4 @@
 	- 2 Players (done)
 	- Score
 	- Random Spawning
+	- Bullet Time (done)

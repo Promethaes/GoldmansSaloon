@@ -36,6 +36,14 @@ public class PlayerController : MonoBehaviour
         Right
     }
 
+    enum GunEnum
+    {
+        Base,
+        Shotgun,
+        Gattling,
+    }
+
+
     [Header("Control Values")]
     public float movementSpeed = 1.0f;
     [Range(0.1f, 1.0f)]
@@ -43,11 +51,17 @@ public class PlayerController : MonoBehaviour
     [Range(0.1f, 1.0f)]
     public float movementFalloffRate = 1.0f;
     public float timeScaleChange = 0.5f;
+    public float physicsTimeScaleChange = 0.5f;
     public float tableKnockbackScalar = 3.0f;
     public int hp = 3;
+    [Tooltip("The speed at which the bullet time slider goes down")]
+    public float bulletTimeSliderSpeed = 2.0f;
+    [Tooltip("The value that the bullet time slider has to surpass to reset the cooldown.")]
+    public float bulletTimeCooldownThreshold = 0.25f;
 
     [Header("References")]
     public Rigidbody2D rigidbody2D;
+    public Slider bulletTimeSlider;
     public PlayerUiInfo p1UiInfo;
     public PlayerUiInfo p2UiInfo;
     public SpriteRenderer spriteRenderer;
@@ -55,6 +69,11 @@ public class PlayerController : MonoBehaviour
     public List<Sprite> p1Sprites;
     [Tooltip("0. Forward1\n1. Forward2\n2. Left1\n3. Left2\n4. Right1\n5. Right2")]
     public List<Sprite> p2Sprites;
+    [Tooltip("0. Base Gun\n1. Shotgun\n2. Gattling Gun")]
+    public List<Gun> guns;
+
+    GunEnum _currentGun = GunEnum.Base;
+    bool _shooting = false;
 
     //because the images are not on a sprite sheet, we have to do it like this
     List<Sprite> _currentPlayerSprites = new List<Sprite>();
@@ -64,7 +83,11 @@ public class PlayerController : MonoBehaviour
     Vector2 _movementVec = new Vector2();
 
     bool _kicking = false;
+
     SpriteOrientation spriteOrientation = SpriteOrientation.Forward;
+
+    static bool _bulletTimeCooldown = false;
+    static bool _bulletTime = false;
 
     static int numPlayers = 0;
     int playerNumber = 0;
@@ -83,6 +106,8 @@ public class PlayerController : MonoBehaviour
             _currentPlayerSprites = p2Sprites;
             p2UiInfo.uiObject.SetActive(true);
         }
+
+        bulletTimeSlider = FindObjectOfType<Slider>();
 
         CheckSpriteOrientation();
         spriteRenderer.sprite = _activeFrame1;
@@ -108,6 +133,35 @@ public class PlayerController : MonoBehaviour
             }
         }
         StartCoroutine(FlipFlopAnimation());
+
+        IEnumerator HandleBulletTimeBar()
+        {
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+                if (hp <= 0)
+                    continue;
+
+                _bulletTimeCooldown = bulletTimeSlider.value <= bulletTimeCooldownThreshold;
+                if (bulletTimeSlider.value <= 0.0f && _bulletTime)
+                {
+                    Debug.Log(bulletTimeSlider.value);
+                    _bulletTime = false;
+                    Time.timeScale = 1.0f;
+                    Time.fixedDeltaTime = Time.timeScale * 0.02f;
+                }
+
+                if (playerNumber == 1)
+                {
+                    if (_bulletTime)
+                        bulletTimeSlider.value = bulletTimeSlider.value - Time.deltaTime * bulletTimeSliderSpeed;
+                    else
+                        bulletTimeSlider.value = bulletTimeSlider.value + Time.deltaTime;
+                }
+            }
+        }
+        StartCoroutine(HandleBulletTimeBar());
+
     }
 
     private void OnDisable()
@@ -117,12 +171,21 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (hp < 0)
+            return;
         CheckSpriteOrientation();
+        if (_shooting)
+            guns[(int)_currentGun].Shoot();
     }
 
     //potentially use animation curve? prolly not
     private void FixedUpdate()
     {
+        if (hp <= 0)
+        {
+            rigidbody2D.velocity = Vector2.zero;
+            return;
+        }
         var force = _movementVec * movementSpeed;
         rigidbody2D.AddForce(force, ForceMode2D.Impulse);
 
@@ -138,17 +201,35 @@ public class PlayerController : MonoBehaviour
         {
             _activeFrame1 = _currentPlayerSprites[(int)Animations.Forward1];
             _activeFrame2 = _currentPlayerSprites[(int)Animations.Forward2];
+            guns[(int)_currentGun].SetGunOrientation(Gun.GunOrientation.Forward);
         }
         else if (spriteOrientation == SpriteOrientation.Left)
         {
             _activeFrame1 = _currentPlayerSprites[(int)Animations.Left1];
             _activeFrame2 = _currentPlayerSprites[(int)Animations.Left2];
+            guns[(int)_currentGun].SetGunOrientation(Gun.GunOrientation.Left);
         }
         else if (spriteOrientation == SpriteOrientation.Right)
         {
             _activeFrame1 = _currentPlayerSprites[(int)Animations.Right1];
             _activeFrame2 = _currentPlayerSprites[(int)Animations.Right2];
+            guns[(int)_currentGun].SetGunOrientation(Gun.GunOrientation.Right);
         }
+    }
+
+    public void Revive()
+    {
+        hp = 3;
+        gameObject.transform.Rotate(new Vector3(0.0f, 0.0f, -90.0f));
+    }
+    public void TakeDamage(int damage)
+    {
+        if (hp <= 0)
+            return;
+        hp -= damage;
+        //TODO: insert UI meddling here
+        if (hp <= 0)
+            gameObject.transform.Rotate(new Vector3(0.0f, 0.0f, 90.0f));
     }
 
     //Input Action Events
@@ -160,10 +241,20 @@ public class PlayerController : MonoBehaviour
     }
     public void OnBulletTime(CallbackContext context)
     {
-        if (context.performed)
+        if (hp <= 0)
+            return;
+        if (context.performed && !_bulletTimeCooldown)
+        {
+            _bulletTime = true;
             Time.timeScale = timeScaleChange;
-        else if (context.canceled)
+            Time.fixedDeltaTime = timeScaleChange * 0.02f;
+        }
+        else
+        {
+            _bulletTime = false;
             Time.timeScale = 1.0f;
+            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+        }
     }
     public void OnKick(CallbackContext context)
     {
@@ -172,15 +263,21 @@ public class PlayerController : MonoBehaviour
         else if (context.canceled)
             _kicking = false;
     }
-    public void OnLook(CallbackContext context){
+    public void OnLook(CallbackContext context)
+    {
         float x = context.ReadValue<Vector2>().x;
 
-        if(x < -gamepadDeadzone)
+        if (x < -gamepadDeadzone)
             spriteOrientation = SpriteOrientation.Left;
         else if (x > gamepadDeadzone)
             spriteOrientation = SpriteOrientation.Right;
         else
             spriteOrientation = SpriteOrientation.Forward;
+    }
+
+    public void OnFire(CallbackContext context)
+    {
+        _shooting = context.performed;
     }
 
 
@@ -199,7 +296,6 @@ public class PlayerController : MonoBehaviour
 
             var otherRigid = other.gameObject.GetComponent<Rigidbody2D>();
 
-            Debug.Log("kicking");
             if (_kicking)
                 otherRigid.AddForce(force * tableKnockbackScalar * otherRigid.mass, ForceMode2D.Impulse);
             else
