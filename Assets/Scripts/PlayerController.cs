@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
         Right
     }
 
-    enum GunEnum
+    public enum GunEnum
     {
         Base,
         Shotgun,
@@ -58,6 +58,8 @@ public class PlayerController : MonoBehaviour
     public float bulletTimeSliderSpeed = 2.0f;
     [Tooltip("The value that the bullet time slider has to surpass to reset the cooldown.")]
     public float bulletTimeCooldownThreshold = 0.25f;
+    public GunEnum _currentGun = GunEnum.Base;
+
 
     [Header("References")]
     public Rigidbody2D rigidbody2D;
@@ -72,7 +74,6 @@ public class PlayerController : MonoBehaviour
     [Tooltip("0. Base Gun\n1. Shotgun\n2. Gattling Gun")]
     public List<Gun> guns;
 
-    GunEnum _currentGun = GunEnum.Base;
     bool _shooting = false;
 
     //because the images are not on a sprite sheet, we have to do it like this
@@ -171,9 +172,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (hp < 0)
+        if (hp <= 0)
             return;
-        CheckSpriteOrientation();
         if (_shooting)
             guns[(int)_currentGun].Shoot();
     }
@@ -273,6 +273,7 @@ public class PlayerController : MonoBehaviour
             spriteOrientation = SpriteOrientation.Right;
         else
             spriteOrientation = SpriteOrientation.Forward;
+        CheckSpriteOrientation();
     }
 
     public void OnFire(CallbackContext context)

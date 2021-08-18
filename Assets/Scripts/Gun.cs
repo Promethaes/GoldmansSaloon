@@ -19,6 +19,7 @@ public class Gun : MonoBehaviour
     public int maxAmmo = -1;
     public float rateOfFire = 0.5f;
     public int bulletPoolSize = 8;
+    public AudioSource shootSound;
     int _currentAmmo = -1;
     List<BulletInfo> _bullets = new List<BulletInfo>();
     int _bulletKey = 0;
@@ -78,6 +79,7 @@ public class Gun : MonoBehaviour
             _currentAmmo--;
         }
         _rateOfFireTimer = rateOfFire;
+        shootSound.PlayOneShot(shootSound.clip);
     }
 
 }
