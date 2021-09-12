@@ -1,56 +1,144 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public enum BulletSpawnpointMovementType
+    [System.Serializable]
+    public enum ShootType
     {
-        SyncWithPlayer,
-        FollowAnimationCurve
+        Basic,
+        FollowPlayerLoose,
+        FollowPlayerExactly,
+        [Tooltip("This class will NOT call gun.shoot")]
+        HandledExternally
     }
     public int maxHP = 3;
+    public int scoreValue = 100;
 
     [Header("Gun Related")]
-    [Tooltip("This is for when you need the position of the bullet to change based on the position of the closest player, or if you need the bullet spawn position to change based on an animation curve.")]
-    public bool canMoveBulletSpawnpoint = false;
-    [Tooltip("Only use this when canMoveBulletSpawnpoint is true.")]
-    public BulletSpawnpointMovementType bulletSpawnpointMovementType;
-    [Tooltip("The number of times the bullet start point should lerp back and forth. One cycle is a round trip. NYE: Set to -1 to only lerp for half a cycle.")]
-    public int numLerpCycles = 0;
+    [Tooltip("Basic: Sets the gun's orientation to straight down.\nFollowPlayerLoose: Gun orientation depends on whether the player is to the left or right of the enemy.\nFollowPlayerExactly: Bullet start position will change depending on player position relative to this enemy. NOTE: if using this mode, make sure to properly hook up the BulletStartPoint reference.")]
+    public ShootType shootType = ShootType.Basic;
+    [Tooltip("Used with ShootType FollowPlayerExactly. Changes how far away from the enemy the bullet will spawn.")]
+    public float bulletStartPointDistanceScalar = 2.0f;
+    [Tooltip("Used with ShootType FollowPlayerExactly. Changes how high the bullet can be relative to this enemy.")]
+    public float bulletYPosLimit = 0.4f;
 
     [Header("References")]
-    [Tooltip("Only use this when canMoveBulletSpawnpoint is true.")]
-    public Transform bulletSpawnPoint;
     public Gun gun;
-    [Tooltip("Lerp position 1 for animation curve style bullet spawnpoint movement.")]
-    public Transform animCurvePosition1;
-    [Tooltip("Lerp position 2 for animation curve style bullet spawnpoint movement.")]
-    public Transform animCurvePosition2;
-    [Tooltip("Gets disabled on death and re-enabled on enable.")]
-    public CircleCollider2D triggerVolume;
+    [Tooltip("Only used when ShootType is set to FollowPlayerExactly.")]
+    public Transform bulletStartPoint;
     public GameObject deathParticles;
-    public SpriteRenderer spriteRenderer;
-    //public List<Sprite> 
+    public AudioSource deathSound;
 
     int _currentHP = 0;
+    PlayerController[] _players = null;
+
     private void OnEnable()
     {
+
         _currentHP = maxHP;
-        gun.SetGunOrientation(Gun.GunOrientation.Forward);
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        gun.Shoot();
+        IEnumerator BasicShoot()
+        {
+            gun.SetGunOrientation(Gun.GunOrientation.Forward);
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+                gun.Shoot();
+            }
+        }
+
+        IEnumerator FollowPlayerLooseShoot()
+        {
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+
+                var direction = FindClosestPlayer().position - transform.position;
+                direction = direction.normalized;
+
+                if (direction.x > 0.0f)
+                    gun.SetGunOrientation(Gun.GunOrientation.Right);
+                else //default to shooting left if < 0 or on 0
+                    gun.SetGunOrientation(Gun.GunOrientation.Left);
+                gun.Shoot();
+            }
+        }
+        IEnumerator FollowPlayerExactlyShoot()
+        {
+            gun.SetGunOrientation(Gun.GunOrientation.Forward);
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+
+                var direction = FindClosestPlayer().position - transform.position;
+                direction = direction.normalized;
+                if (direction.y > bulletYPosLimit)
+                    continue;
+                bulletStartPoint.position = transform.position + direction * bulletStartPointDistanceScalar;
+                gun.Shoot();
+            }
+        }
+
+        //select method of shooting
+        switch (shootType)
+        {
+            case ShootType.Basic:
+                StartCoroutine(BasicShoot());
+                break;
+            case ShootType.FollowPlayerLoose:
+                StartCoroutine(FollowPlayerLooseShoot());
+                break;
+            case ShootType.FollowPlayerExactly:
+                StartCoroutine(FollowPlayerExactlyShoot());
+                break;
+            case ShootType.HandledExternally:
+                break;
+        }
     }
 
-    public void TakeDamage(int damage){
+    public Transform FindClosestPlayer()
+    {
+        if (_players == null)
+            _players = FindObjectsOfType<PlayerController>();
+        Transform pTransform = null;
+        foreach (var p in _players)
+        {
+            if (pTransform == null)
+            {
+                pTransform = p.transform;
+                continue;
+            }
+
+            //find the closer player
+            var currentDist = (transform.position - pTransform.position).magnitude;
+            var tempDist = transform.position - p.transform.position;
+            if (tempDist.magnitude < currentDist)
+                pTransform = p.transform;
+        }
+        return pTransform;
+    }
+
+    public void TakeDamage(int damage)
+    {
         _currentHP -= damage;
-        if(_currentHP <= 0){
+        if (_currentHP <= 0)
+        {
+            gameObject.SetActive(false);
+            //TODO: particles
             //IEnumerator Die(){
             //    deathParticles.SetActive(true);
             //}
         }
+    }
+
+    public int GetCurrentHP()
+    {
+        return _currentHP;
+    }
+
+    public int GetScoreValue()
+    {
+        return scoreValue;
     }
 }

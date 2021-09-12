@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
         public List<Image> gunSprites;
         public TMPro.TextMeshProUGUI ammoText;
         //insert gun enum stuff
-        [HideInInspector] public int currentActiveGun = 0;
+        [HideInInspector] public GunEnum currentActiveGun = 0;
         [HideInInspector] public int currentAmmoUI = 0;
     }
 
@@ -91,21 +91,24 @@ public class PlayerController : MonoBehaviour
     static bool _bulletTime = false;
 
     static int numPlayers = 0;
-    int playerNumber = 0;
+    int _playerNumber = 0;
+
+    [HideInInspector] public int currentScore = 0;
     private void OnEnable()
     {
         numPlayers++;
-        playerNumber = numPlayers;
+        _playerNumber = numPlayers;
 
-        if (playerNumber == 1)
+        switch (_playerNumber)
         {
-            _currentPlayerSprites = p1Sprites;
-            p1UiInfo.uiObject.SetActive(true);
-        }
-        else if (playerNumber == 2)
-        {
-            _currentPlayerSprites = p2Sprites;
-            p2UiInfo.uiObject.SetActive(true);
+            case 1:
+                _currentPlayerSprites = p1Sprites;
+                p1UiInfo.uiObject.SetActive(true);
+                break;
+            case 2:
+                _currentPlayerSprites = p2Sprites;
+                p2UiInfo.uiObject.SetActive(true);
+                break;
         }
 
         bulletTimeSlider = FindObjectOfType<Slider>();
@@ -152,7 +155,7 @@ public class PlayerController : MonoBehaviour
                     Time.fixedDeltaTime = Time.timeScale * 0.02f;
                 }
 
-                if (playerNumber == 1)
+                if (_playerNumber == 1)
                 {
                     if (_bulletTime)
                         bulletTimeSlider.value = bulletTimeSlider.value - Time.deltaTime * bulletTimeSliderSpeed;
@@ -230,6 +233,34 @@ public class PlayerController : MonoBehaviour
         //TODO: insert UI meddling here
         if (hp <= 0)
             gameObject.transform.Rotate(new Vector3(0.0f, 0.0f, 90.0f));
+    }
+
+    public void AddScore(int score)
+    {
+        currentScore += score;
+    }
+
+    public void SetCurrentGun(GunEnum gun)
+    {
+        _currentGun = gun;
+        if (guns[(int)_currentGun].maxAmmo == -1)
+        {
+            p1UiInfo.ammoText.gameObject.SetActive(false);
+            p2UiInfo.ammoText.gameObject.SetActive(false);
+        }
+        else
+        {
+            switch (_playerNumber)
+            {
+                case 1:
+                    p1UiInfo.ammoText.gameObject.SetActive(false);
+                    break;
+                case 2:
+                    p2UiInfo.ammoText.gameObject.SetActive(false);
+                    break;
+                    
+            }
+        }
     }
 
     //Input Action Events

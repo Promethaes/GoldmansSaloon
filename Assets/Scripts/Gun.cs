@@ -82,4 +82,9 @@ public class Gun : MonoBehaviour
         shootSound.PlayOneShot(shootSound.clip);
     }
 
+    public bool CanShoot()
+    {
+        return _rateOfFireTimer < rateOfFire;
+    }
+
 }
