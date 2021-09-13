@@ -691,6 +691,33 @@ MonoBehaviour:
   hp: 3
   bulletTimeSliderSpeed: 2
   bulletTimeCooldownThreshold: 0.15
+  _bulletTimePitchCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _bulletTimePitchCurveSpeed: 10
+  _bulletTimeSlowPitch: 80
+  _bulletTimeNormalPitch: 100
   _currentGun: 0
   rigidbody2D: {fileID: 6813931906347582663}
   bulletTimeSlider: {fileID: 0}
@@ -739,6 +766,7 @@ MonoBehaviour:
   - {fileID: 3814781830842297399}
   - {fileID: 6880265064360268928}
   - {fileID: 5752874755886874175}
+  _masterMix: {fileID: 24100000, guid: c4a30d306d367944a8171ec43b04fc36, type: 2}
   currentScore: 0
 --- !u!61 &7399971061917896912
 BoxCollider2D:

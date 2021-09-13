@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 using static UnityEngine.InputSystem.InputAction;
 
@@ -58,6 +59,10 @@ public class PlayerController : MonoBehaviour
     public float bulletTimeSliderSpeed = 2.0f;
     [Tooltip("The value that the bullet time slider has to surpass to reset the cooldown.")]
     public float bulletTimeCooldownThreshold = 0.25f;
+    [SerializeField] AnimationCurve _bulletTimePitchCurve = null;
+    [SerializeField] float _bulletTimePitchCurveSpeed = 5.0f;
+    [SerializeField] float _bulletTimeSlowPitch = 80.0f;
+    [SerializeField] float _bulletTimeNormalPitch = 100.0f;
     public GunEnum _currentGun = GunEnum.Base;
 
 
@@ -73,6 +78,7 @@ public class PlayerController : MonoBehaviour
     public List<Sprite> p2Sprites;
     [Tooltip("0. Base Gun\n1. Shotgun\n2. Gattling Gun")]
     public List<Gun> guns;
+    [SerializeField] AudioMixer _masterMix;
 
     bool _shooting = false;
 
@@ -89,6 +95,7 @@ public class PlayerController : MonoBehaviour
 
     static bool _bulletTimeCooldown = false;
     static bool _bulletTime = false;
+    static bool _bulletTimeLerpingPitch = false;
 
     static int numPlayers = 0;
     int _playerNumber = 0;
@@ -166,6 +173,28 @@ public class PlayerController : MonoBehaviour
         }
         StartCoroutine(HandleBulletTimeBar());
 
+        IEnumerator BTLerpPitch()
+        {
+            float x = 0.0f;
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+                float time = Time.deltaTime * _bulletTimePitchCurveSpeed;
+                if (_bulletTime)
+                    x += time*bulletTimeSliderSpeed;
+                else
+                    x -= time/bulletTimeSliderSpeed;
+                if (x < 0.0f)
+                    x = 0.0f;
+                else if (x > 1.0f)
+                    x = 1.0f;
+
+                float temp = Mathf.Lerp(_bulletTimeNormalPitch, _bulletTimeSlowPitch, _bulletTimePitchCurve.Evaluate(x));
+                Debug.Log(temp);
+                _masterMix.SetFloat("Master Pitch", temp / 100.0f);
+            }
+        }
+        StartCoroutine(BTLerpPitch());
     }
 
     private void OnDisable()
@@ -232,7 +261,14 @@ public class PlayerController : MonoBehaviour
         hp -= damage;
         //TODO: insert UI meddling here
         if (hp <= 0)
+        {
             gameObject.transform.Rotate(new Vector3(0.0f, 0.0f, 90.0f));
+            //find a way to check if all players are dead
+            //then,
+            //_bulletTime = false;
+            //Time.timeScale = 1.0f;
+            //Time.fixedDeltaTime = Time.timeScale * 0.02f;   
+        }
     }
 
     public void AddScore(int score)
@@ -258,7 +294,7 @@ public class PlayerController : MonoBehaviour
                 case 2:
                     p2UiInfo.ammoText.gameObject.SetActive(false);
                     break;
-                    
+
             }
         }
     }
@@ -282,6 +318,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+
             _bulletTime = false;
             Time.timeScale = 1.0f;
             Time.fixedDeltaTime = Time.timeScale * 0.02f;

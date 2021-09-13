@@ -231,7 +231,7 @@ GameObject:
   - component: {fileID: 341842051}
   - component: {fileID: 341842050}
   m_Layer: 0
-  m_Name: Audio Source
+  m_Name: bgm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -246,7 +246,8 @@ AudioSource:
   m_GameObject: {fileID: 341842049}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -5981073894682767048, guid: c4a30d306d367944a8171ec43b04fc36,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: d77bef11c4df40545a0ef0329a11dbec, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.5
@@ -1574,6 +1575,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Shotgun Outlaw
       objectReference: {fileID: 0}
+    - target: {fileID: 6229165230280974789, guid: aad3986bd5de8c34ea3da45c8f1b2914,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aad3986bd5de8c34ea3da45c8f1b2914, type: 3}
 --- !u!1001 &1830880096772352586
@@ -1657,6 +1663,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sniper Outlaw
       objectReference: {fileID: 0}
+    - target: {fileID: 979087943321046617, guid: 26c95772cf29742448d8e4166293d1ee,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 979087943321046621, guid: 26c95772cf29742448d8e4166293d1ee,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1725,6 +1736,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Outlaw
+      objectReference: {fileID: 0}
+    - target: {fileID: 4458148687505953266, guid: 991fed19adf7dc34393f955d1fa3a3a0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4458148687505953270, guid: 991fed19adf7dc34393f955d1fa3a3a0,
         type: 3}
@@ -1849,6 +1865,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CrazyPete
+      objectReference: {fileID: 0}
+    - target: {fileID: 1296285579889814655, guid: d2a1c5e751d3c7848b58a9539d6ff4ba,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2a1c5e751d3c7848b58a9539d6ff4ba, type: 3}
