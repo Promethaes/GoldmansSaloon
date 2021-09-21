@@ -718,7 +718,7 @@ MonoBehaviour:
   _bulletTimePitchCurveSpeed: 10
   _bulletTimeSlowPitch: 80
   _bulletTimeNormalPitch: 100
-  _currentGun: 0
+  _currentGun: 1
   rigidbody2D: {fileID: 6813931906347582663}
   bulletTimeSlider: {fileID: 0}
   p1UiInfo:
@@ -747,6 +747,8 @@ MonoBehaviour:
     ammoText: {fileID: 1013107432595857790}
     currentActiveGun: 0
     currentAmmoUI: 0
+  fullHeart: {fileID: 21300000, guid: cc4e9b4253086e542b996b5bb3562b9b, type: 3}
+  brokenHeart: {fileID: 21300000, guid: cdec2ced2a8ac504382df4bcc20f588d, type: 3}
   spriteRenderer: {fileID: 5209067135322230136}
   p1Sprites:
   - {fileID: 21300000, guid: 142d7607ec1f7be4f99b50b793784342, type: 3}

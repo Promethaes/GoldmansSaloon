@@ -17,6 +17,33 @@ public class PlayerController : MonoBehaviour
         //insert gun enum stuff
         [HideInInspector] public GunEnum currentActiveGun = 0;
         [HideInInspector] public int currentAmmoUI = 0;
+
+        public void OnHPChange(int currentHP, Sprite fullHeart, Sprite brokenHeart)
+        {
+            switch (currentHP)
+            {
+                case 3:
+                    hearts[0].sprite = fullHeart;
+                    hearts[1].sprite = fullHeart;
+                    hearts[2].sprite = fullHeart;
+                    break;
+                case 2:
+                    hearts[0].sprite = brokenHeart;
+                    hearts[1].sprite = fullHeart;
+                    hearts[2].sprite = fullHeart;
+                    break;
+                case 1:
+                    hearts[0].sprite = brokenHeart;
+                    hearts[1].sprite = brokenHeart;
+                    hearts[2].sprite = fullHeart;
+                    break;
+                case 0:
+                    hearts[0].sprite = brokenHeart;
+                    hearts[1].sprite = brokenHeart;
+                    hearts[2].sprite = brokenHeart;
+                    break;
+            }
+        }
     }
 
     enum Animations
@@ -71,6 +98,8 @@ public class PlayerController : MonoBehaviour
     public Slider bulletTimeSlider;
     public PlayerUiInfo p1UiInfo;
     public PlayerUiInfo p2UiInfo;
+    public Sprite fullHeart;
+    public Sprite brokenHeart;
     public SpriteRenderer spriteRenderer;
     [Tooltip("0. Forward1\n1. Forward2\n2. Left1\n3. Left2\n4. Right1\n5. Right2")]
     public List<Sprite> p1Sprites;
@@ -86,6 +115,7 @@ public class PlayerController : MonoBehaviour
     List<Sprite> _currentPlayerSprites = new List<Sprite>();
     Sprite _activeFrame1 = null;
     Sprite _activeFrame2 = null;
+    bool _invinceFlickering = false;
 
     Vector2 _movementVec = new Vector2();
 
@@ -181,16 +211,15 @@ public class PlayerController : MonoBehaviour
                 yield return new WaitForEndOfFrame();
                 float time = Time.deltaTime * _bulletTimePitchCurveSpeed;
                 if (_bulletTime)
-                    x += time*bulletTimeSliderSpeed;
+                    x += time * bulletTimeSliderSpeed;
                 else
-                    x -= time/bulletTimeSliderSpeed;
+                    x -= time / bulletTimeSliderSpeed;
                 if (x < 0.0f)
                     x = 0.0f;
                 else if (x > 1.0f)
                     x = 1.0f;
 
                 float temp = Mathf.Lerp(_bulletTimeNormalPitch, _bulletTimeSlowPitch, _bulletTimePitchCurve.Evaluate(x));
-                Debug.Log(temp);
                 _masterMix.SetFloat("Master Pitch", temp / 100.0f);
             }
         }
@@ -256,9 +285,34 @@ public class PlayerController : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
-        if (hp <= 0)
+        if (hp <= 0 || _invinceFlickering)
             return;
         hp -= damage;
+        IEnumerator InvincibilityFlicker()
+        {
+            _invinceFlickering = true;
+            var col = spriteRenderer.color;
+            for (int i = 0; i < 4; i++)
+            {
+                col.a = 0.0f;
+                spriteRenderer.color = col;
+                yield return new WaitForSeconds(0.125f);
+                col.a = 1.0f;
+                spriteRenderer.color = col;
+                yield return new WaitForSeconds(0.125f);
+            }
+            _invinceFlickering = false;
+        }
+        StartCoroutine(InvincibilityFlicker());
+        switch (_playerNumber)
+        {
+            case 1:
+                p1UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                break;
+            case 2:
+                p2UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                break;
+        }
         //TODO: insert UI meddling here
         if (hp <= 0)
         {
@@ -279,23 +333,19 @@ public class PlayerController : MonoBehaviour
     public void SetCurrentGun(GunEnum gun)
     {
         _currentGun = gun;
-        if (guns[(int)_currentGun].maxAmmo == -1)
+        switch (_playerNumber)
         {
-            p1UiInfo.ammoText.gameObject.SetActive(false);
-            p2UiInfo.ammoText.gameObject.SetActive(false);
-        }
-        else
-        {
-            switch (_playerNumber)
-            {
-                case 1:
+            case 1:
+                if (guns[(int)_currentGun].maxAmmo == -1)
                     p1UiInfo.ammoText.gameObject.SetActive(false);
-                    break;
-                case 2:
-                    p2UiInfo.ammoText.gameObject.SetActive(false);
-                    break;
+                else
+                    p1UiInfo.ammoText.gameObject.SetActive(true);
 
-            }
+                break;
+            case 2:
+                p2UiInfo.ammoText.gameObject.SetActive(true);
+                break;
+
         }
     }
 
