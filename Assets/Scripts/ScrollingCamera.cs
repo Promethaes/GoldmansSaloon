@@ -60,7 +60,7 @@ public class ScrollingCamera : MonoBehaviour
                 yield return new WaitForEndOfFrame();
                 x += Time.deltaTime * _tranistionSpeed;
                 _scrollSpeed = Mathf.Lerp(originalSpeed, -originalSpeed, _transitionCurve.Evaluate(x));
-                _backgroundScrollSpeed = Mathf.Lerp(originalBGSpeed, -originalBGSpeed, _transitionCurve.Evaluate(x));
+                _backgroundScrollSpeed = -originalBGSpeed;
             }
 
         }

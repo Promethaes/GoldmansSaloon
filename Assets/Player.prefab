@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 70737725}
   m_Layer: 0
   m_Name: TableTriggerZone
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -719,6 +719,7 @@ MonoBehaviour:
   _bulletTimeSlowPitch: 80
   _bulletTimeNormalPitch: 100
   _currentGun: 1
+  invinceTime: 7
   rigidbody2D: {fileID: 6813931906347582663}
   bulletTimeSlider: {fileID: 0}
   p1UiInfo:
@@ -748,6 +749,7 @@ MonoBehaviour:
     currentActiveGun: 0
     currentAmmoUI: 0
   fullHeart: {fileID: 21300000, guid: cc4e9b4253086e542b996b5bb3562b9b, type: 3}
+  goldenHeart: {fileID: 21300000, guid: ae348f88348af94479b1a6808d6bd711, type: 3}
   brokenHeart: {fileID: 21300000, guid: cdec2ced2a8ac504382df4bcc20f588d, type: 3}
   spriteRenderer: {fileID: 5209067135322230136}
   p1Sprites:
@@ -2022,10 +2024,25 @@ PrefabInstance:
       propertyPath: bulletOwner
       value: 
       objectReference: {fileID: 7482465508292945945}
+    - target: {fileID: 2394444198883759523, guid: 99b0bc4c1dd272f4a862ee8c8efc40f4,
+        type: 3}
+      propertyPath: damage
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2394444198883759523, guid: 99b0bc4c1dd272f4a862ee8c8efc40f4,
+        type: 3}
+      propertyPath: bulletSpeed
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 5066782407675107797, guid: 99b0bc4c1dd272f4a862ee8c8efc40f4,
         type: 3}
       propertyPath: bulletPoolSize
       value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 5066782407675107797, guid: 99b0bc4c1dd272f4a862ee8c8efc40f4,
+        type: 3}
+      propertyPath: maxAmmo
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8178331458676885689, guid: 99b0bc4c1dd272f4a862ee8c8efc40f4,
         type: 3}
@@ -2124,6 +2141,11 @@ PrefabInstance:
       propertyPath: bulletOwner
       value: 
       objectReference: {fileID: 7482465508292945945}
+    - target: {fileID: 1862102579943538514, guid: b613236365e1e5b42b8f1bf9e103db7a,
+        type: 3}
+      propertyPath: bulletSpeed
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 2053426685174666981, guid: b613236365e1e5b42b8f1bf9e103db7a,
         type: 3}
       propertyPath: m_LocalPosition.z
@@ -2251,6 +2273,16 @@ PrefabInstance:
       propertyPath: bulletOwner
       value: 
       objectReference: {fileID: 7482465508292945945}
+    - target: {fileID: 1862102579943538514, guid: b613236365e1e5b42b8f1bf9e103db7a,
+        type: 3}
+      propertyPath: damage
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1862102579943538514, guid: b613236365e1e5b42b8f1bf9e103db7a,
+        type: 3}
+      propertyPath: bulletSpeed
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 2053426685174666981, guid: b613236365e1e5b42b8f1bf9e103db7a,
         type: 3}
       propertyPath: m_LocalPosition.z

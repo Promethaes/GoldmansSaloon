@@ -27,7 +27,7 @@ public class Gun : MonoBehaviour
     List<GameObject> _currentSpawnLocations = null;
 
     // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
         _currentAmmo = maxAmmo;
         bulletPrefab.SetActive(false);
@@ -76,8 +76,8 @@ public class Gun : MonoBehaviour
             bRigid.AddForce(dir * _bullets[_bulletKey].bulletSpeed, ForceMode2D.Impulse);
 
             _bulletKey = (_bulletKey + 1) % _bullets.Count;
-            _currentAmmo--;
         }
+        _currentAmmo--;
         _rateOfFireTimer = rateOfFire;
         shootSound.PlayOneShot(shootSound.clip);
     }
@@ -85,6 +85,26 @@ public class Gun : MonoBehaviour
     public bool CanShoot()
     {
         return _rateOfFireTimer < rateOfFire;
+    }
+
+    public void ResetAmmo()
+    {
+        _currentAmmo = maxAmmo;
+    }
+
+    public int GetCurrentAmmo()
+    {
+        return _currentAmmo;
+    }
+
+    public void ClearBullets()
+    {
+        for (int i = 0; i < _bullets.Count; i++)
+        {
+            Destroy(_bullets[i]);
+            _bullets.RemoveAt(i);
+            i--;
+        }
     }
 
 }

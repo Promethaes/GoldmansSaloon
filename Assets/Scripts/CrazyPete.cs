@@ -16,8 +16,10 @@ public class CrazyPete : MonoBehaviour
     Vector2 _originalPoint = Vector2.zero;
     bool _firing = false;
 
+    EntityHealth health = null;
     private void OnEnable()
     {
+        health = GetComponent<EntityHealth>();
         _crazyGun.SetGunOrientation(Gun.GunOrientation.Forward);
         IEnumerator Rotate()
         {
@@ -32,6 +34,8 @@ public class CrazyPete : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (health.GetCurrentHP() < 0)
+            return;
         if (_crazyGun.CanShoot() && !_firing)
         {
             IEnumerator Fire()

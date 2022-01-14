@@ -31,17 +31,18 @@ public class Enemy : MonoBehaviour
     public GameObject deathParticles;
     public AudioSource deathSound;
 
-    int _currentHP = 0;
     PlayerController[] _players = null;
+
+    EntityHealth health = null;
 
     private void OnEnable()
     {
-
-        _currentHP = maxHP;
+        health = GetComponent<EntityHealth>();
+        health.FullHeal();
         IEnumerator BasicShoot()
         {
             gun.SetGunOrientation(Gun.GunOrientation.Forward);
-            while (true)
+            while (health.GetCurrentHP() > 0)
             {
                 yield return new WaitForEndOfFrame();
                 gun.Shoot();
@@ -50,7 +51,7 @@ public class Enemy : MonoBehaviour
 
         IEnumerator FollowPlayerLooseShoot()
         {
-            while (true)
+            while (health.GetCurrentHP() > 0)
             {
                 yield return new WaitForEndOfFrame();
 
@@ -67,7 +68,7 @@ public class Enemy : MonoBehaviour
         IEnumerator FollowPlayerExactlyShoot()
         {
             gun.SetGunOrientation(Gun.GunOrientation.Forward);
-            while (true)
+            while (health.GetCurrentHP() > 0)
             {
                 yield return new WaitForEndOfFrame();
 
@@ -119,26 +120,22 @@ public class Enemy : MonoBehaviour
         return pTransform;
     }
 
-    public void TakeDamage(int damage)
-    {
-        _currentHP -= damage;
-        if (_currentHP <= 0)
-        {
-            gameObject.SetActive(false);
-            //TODO: particles
-            //IEnumerator Die(){
-            //    deathParticles.SetActive(true);
-            //}
-        }
-    }
-
-    public int GetCurrentHP()
-    {
-        return _currentHP;
-    }
-
     public int GetScoreValue()
     {
         return scoreValue;
+    }
+
+    public void OnDie()
+    {
+        if (!GetComponent<SpriteRenderer>().enabled)
+            return;
+        GetComponent<SpriteRenderer>().enabled = false;
+        deathSound.Play();
+        IEnumerator Wait()
+        {
+            yield return new WaitForSeconds(0.25f);
+            Destroy(gameObject);
+        }
+        StartCoroutine(Wait());
     }
 }

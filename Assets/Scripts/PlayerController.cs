@@ -44,6 +44,18 @@ public class PlayerController : MonoBehaviour
                     break;
             }
         }
+        public void GiveGoldenHearts(Sprite goldheart, Sprite fullHeart)
+        {
+            for (int i = 0; i < hearts.Count; i++)
+            {
+                if (hearts[i].sprite = fullHeart)
+                    hearts[i].sprite = goldheart;
+            }
+        }
+        public void TakeGoldenHearts(int currentHP, Sprite fullHeart, Sprite brokenHeart, Sprite goldenHeart)
+        {
+            OnHPChange(currentAmmoUI, fullHeart, brokenHeart);
+        }
     }
 
     enum Animations
@@ -91,6 +103,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _bulletTimeSlowPitch = 80.0f;
     [SerializeField] float _bulletTimeNormalPitch = 100.0f;
     public GunEnum _currentGun = GunEnum.Base;
+    public float invinceTime = 7.0f;
 
 
     [Header("References")]
@@ -99,6 +112,7 @@ public class PlayerController : MonoBehaviour
     public PlayerUiInfo p1UiInfo;
     public PlayerUiInfo p2UiInfo;
     public Sprite fullHeart;
+    public Sprite goldenHeart;
     public Sprite brokenHeart;
     public SpriteRenderer spriteRenderer;
     [Tooltip("0. Forward1\n1. Forward2\n2. Left1\n3. Left2\n4. Right1\n5. Right2")]
@@ -116,6 +130,7 @@ public class PlayerController : MonoBehaviour
     Sprite _activeFrame1 = null;
     Sprite _activeFrame2 = null;
     bool _invinceFlickering = false;
+    bool _invincePotion = false;
 
     Vector2 _movementVec = new Vector2();
 
@@ -224,6 +239,8 @@ public class PlayerController : MonoBehaviour
             }
         }
         StartCoroutine(BTLerpPitch());
+
+        SetCurrentGun(_currentGun);
     }
 
     private void OnDisable()
@@ -235,8 +252,22 @@ public class PlayerController : MonoBehaviour
     {
         if (hp <= 0)
             return;
+        switch (_playerNumber)
+        {
+            case 1:
+                p1UiInfo.ammoText.text = guns[(int)_currentGun].GetCurrentAmmo().ToString();
+                break;
+            case 2:
+                p2UiInfo.ammoText.text = guns[(int)_currentGun].GetCurrentAmmo().ToString();
+                break;
+
+        }
         if (_shooting)
+        {
             guns[(int)_currentGun].Shoot();
+            if (guns[(int)_currentGun].GetCurrentAmmo() <= 0)
+                SetCurrentGun(GunEnum.Base);
+        }
     }
 
     //potentially use animation curve? prolly not
@@ -281,11 +312,65 @@ public class PlayerController : MonoBehaviour
     public void Revive()
     {
         hp = 3;
+        switch (_playerNumber)
+        {
+            case 1:
+                p1UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                break;
+            case 2:
+                p2UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                break;
+        }
         gameObject.transform.Rotate(new Vector3(0.0f, 0.0f, -90.0f));
+    }
+
+    public void Heal()
+    {
+        hp++;
+        switch (_playerNumber)
+        {
+            case 1:
+                p1UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                break;
+            case 2:
+                p2UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                break;
+        }
+    }
+
+    public void Invince()
+    {
+        _invincePotion = true;
+        IEnumerator InvinceTimer()
+        {
+            yield return new WaitForSeconds(invinceTime);
+            _invincePotion = false;
+        }
+        StartCoroutine(InvinceTimer());
+        switch (_playerNumber)
+        {
+            case 1:
+                p1UiInfo.GiveGoldenHearts(goldenHeart, fullHeart);
+                break;
+            case 2:
+                p2UiInfo.GiveGoldenHearts(goldenHeart, fullHeart);
+                break;
+        }
+    }
+
+    public void ReviveOther()
+    {
+        var players = FindObjectsOfType<PlayerController>();
+        foreach (var p in players)
+            if (p != this)
+            {
+                p.Revive();
+                return;
+            }
     }
     public void TakeDamage(int damage)
     {
-        if (hp <= 0 || _invinceFlickering)
+        if ((_invinceFlickering || _invincePotion) && (damage != 999 || hp <= 0))
             return;
         hp -= damage;
         IEnumerator InvincibilityFlicker()
@@ -341,9 +426,23 @@ public class PlayerController : MonoBehaviour
                 else
                     p1UiInfo.ammoText.gameObject.SetActive(true);
 
+                foreach (var gs in p1UiInfo.gunSprites)
+                    gs.gameObject.SetActive(false);
+
+                p1UiInfo.gunSprites[(int)_currentGun].gameObject.SetActive(true);
+
+                guns[(int)_currentGun].ResetAmmo();
                 break;
             case 2:
-                p2UiInfo.ammoText.gameObject.SetActive(true);
+                if (guns[(int)_currentGun].maxAmmo == -1)
+                    p2UiInfo.ammoText.gameObject.SetActive(false);
+                else
+                    p2UiInfo.ammoText.gameObject.SetActive(true);
+
+                foreach (var gs in p2UiInfo.gunSprites)
+                    gs.gameObject.SetActive(false);
+
+                p2UiInfo.gunSprites[(int)_currentGun].gameObject.SetActive(true);
                 break;
 
         }
@@ -399,13 +498,6 @@ public class PlayerController : MonoBehaviour
         _shooting = context.performed;
     }
 
-
-    //Collision
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        //insert bullet stuff here
-    }
-
     private void OnTriggerStay2D(Collider2D other)
     {
         if (other.CompareTag("Table"))
@@ -421,5 +513,10 @@ public class PlayerController : MonoBehaviour
                 otherRigid.velocity = Vector2.zero;
             return;
         }
+    }
+
+    public bool IsKicking()
+    {
+        return _kicking;
     }
 }

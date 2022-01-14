@@ -11,7 +11,7 @@ public class EntityHealth : MonoBehaviour
 
     int _hp = 0;
 
-    private void Start()
+    private void OnEnable()
     {
         _hp = maxHP;
     }
@@ -20,6 +20,8 @@ public class EntityHealth : MonoBehaviour
     {
         if (_hp <= 0)
             return;
+        if (gameObject.name.Contains("Outlaw"))
+            Debug.Log("yes");
         _hp -= damage;
         OnTakeDamage.Invoke();
         if (_hp <= 0)
@@ -29,6 +31,15 @@ public class EntityHealth : MonoBehaviour
     public bool IsDead()
     {
         return maxHP <= 0;
+    }
+
+    public int GetCurrentHP()
+    {
+        return _hp;
+    }
+
+    public void FullHeal(){
+        _hp = maxHP;
     }
 
 }
