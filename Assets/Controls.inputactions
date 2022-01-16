@@ -281,7 +281,7 @@
                 {
                     "name": "",
                     "id": "f4af8d0e-60ab-438b-a635-32f203848daa",
-                    "path": "<Keyboard>/alt",
+                    "path": "<Keyboard>/rightShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
@@ -303,7 +303,7 @@
                 {
                     "name": "",
                     "id": "fd808643-5c6d-4778-9cf8-abd8804f4b4e",
-                    "path": "<Keyboard>/shift",
+                    "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard&Mouse",
