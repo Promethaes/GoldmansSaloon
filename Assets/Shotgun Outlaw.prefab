@@ -1056,6 +1056,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 3
+  scoreValue: 200
   OnTakeDamage:
     m_PersistentCalls:
       m_Calls:

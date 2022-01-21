@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
         public List<Image> hearts;
         public List<Image> gunSprites;
         public TMPro.TextMeshProUGUI ammoText;
+        public TMPro.TextMeshProUGUI scoreText;
         //insert gun enum stuff
         [HideInInspector] public GunEnum currentActiveGun = 0;
         [HideInInspector] public int currentAmmoUI = 0;
@@ -256,9 +257,11 @@ public class PlayerController : MonoBehaviour
         {
             case 1:
                 p1UiInfo.ammoText.text = guns[(int)_currentGun].GetCurrentAmmo().ToString();
+                p1UiInfo.scoreText.text ="SCORE: " + currentScore.ToString();
                 break;
             case 2:
                 p2UiInfo.ammoText.text = guns[(int)_currentGun].GetCurrentAmmo().ToString();
+                p1UiInfo.scoreText.text ="SCORE: " + currentScore.ToString();
                 break;
 
         }

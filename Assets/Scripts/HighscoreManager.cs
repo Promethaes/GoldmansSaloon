@@ -31,8 +31,10 @@ public class HighscoreManager : MonoBehaviour
     string scoreString = "";
     int letterIndex = 0;
     List<LetterHelper> letters = new List<LetterHelper>();
+
+    bool endsceen = false;
     // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
         letters.Add(firstLetter);
         letters.Add(secondLetter);
@@ -49,13 +51,14 @@ public class HighscoreManager : MonoBehaviour
         {
             if (p == owner)
                 continue;
-            if (p.currentScore > owner.currentScore)
+            if (p.currentScore > owner.currentScore || p.currentScore == owner.currentScore && p.gameObject.activeSelf)
             {
                 gameObject.SetActive(false);
                 owner.gameObject.SetActive(false);
                 return;
             }
         }
+        endsceen = true;
         highscoreCanvas.SetActive(true);
         owner.GetComponent<PlayerInput>().SwitchCurrentActionMap("Highscore");
 
@@ -72,7 +75,7 @@ public class HighscoreManager : MonoBehaviour
 
     public void OnUpArrow(CallbackContext ctx)
     {
-        if (!ctx.performed)
+        if (!ctx.performed || !endsceen)
             return;
 
         var letter = letters[letterIndex].letter;
@@ -85,7 +88,7 @@ public class HighscoreManager : MonoBehaviour
 
     public void OnDownArrow(CallbackContext ctx)
     {
-        if (!ctx.performed)
+        if (!ctx.performed || !endsceen)
             return;
 
         var letter = letters[letterIndex].letter;
@@ -98,7 +101,7 @@ public class HighscoreManager : MonoBehaviour
 
     public void OnAcceptLetter(CallbackContext ctx)
     {
-        if (!ctx.performed)
+        if (!ctx.performed || !endsceen)
             return;
 
         letters[letterIndex].SetSelected(false);
@@ -115,7 +118,7 @@ public class HighscoreManager : MonoBehaviour
     }
     public void OnCancelLetter(CallbackContext ctx)
     {
-        if (!ctx.performed || letterIndex == 0)
+        if (!ctx.performed || letterIndex == 0 || !endsceen)
             return;
 
         letters[letterIndex].SetSelected(false);

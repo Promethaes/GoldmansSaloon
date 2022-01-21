@@ -16,6 +16,13 @@ public class GameMaster : MonoBehaviour
         var p = FindObjectsOfType<PlayerController>();
         foreach (var pl in p)
             players.Add(pl);
+        void Master_OnAllPlayersDead()
+        {
+            var entities = FindObjectsOfType<EntityHealth>();
+            for (int i = 0; i < entities.Length; i++)
+                Destroy(entities[i].gameObject);
+        }
+        OnAllPlayersDead.AddListener(Master_OnAllPlayersDead);
     }
 
     // Update is called once per frame

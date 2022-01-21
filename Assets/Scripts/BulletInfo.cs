@@ -33,7 +33,7 @@ public class BulletInfo : MonoBehaviour
             e?.TakeDamage(damage);
             gameObject.SetActive(false);
             if (e?.GetCurrentHP() <= 0)
-                bulletOwner.AddScore(e.GetCurrentHP());
+                bulletOwner.AddScore(e.GetScoreValue());
         }
         else if (gameObject.CompareTag("EBullet"))
         {
