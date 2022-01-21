@@ -26,10 +26,39 @@ public class EnemySpawner : MonoBehaviour
             spawnInterval = originalSpawnTime;
         }
     }
+
+    class SpawnPointHelper
+    {
+        public Transform point;
+        public float maxCooldown;
+
+        public SpawnPointHelper(Transform p, float cooldown)
+        {
+            point = p;
+            _cooldown = maxCooldown = cooldown;
+        }
+
+        public void SubtractFromCooldown(float time)
+        {
+            _cooldown -= time;
+        }
+        public void ResetCooldown()
+        {
+            _cooldown = maxCooldown;
+        }
+        public bool IsReady()
+        {
+            return _cooldown <= 0.0f;
+        }
+
+        float _cooldown = 0.0f;
+
+    }
     public List<Spawnable> spawnables = new List<Spawnable>();
     public bool canSpawn = true;
+    public float spawnPointCooldown = 0.5f;
 
-    List<Transform> spawnPoints = new List<Transform>();
+    List<SpawnPointHelper> spawnPoints = new List<SpawnPointHelper>();
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +68,7 @@ public class EnemySpawner : MonoBehaviour
 
         var spawns = GetComponentsInChildren<SpriteRenderer>();
         foreach (var s in spawns)
-            spawnPoints.Add(s.transform);
+            spawnPoints.Add(new SpawnPointHelper(s.transform, spawnPointCooldown));
     }
 
     // Update is called once per frame
@@ -54,13 +83,28 @@ public class EnemySpawner : MonoBehaviour
                 SpawnEnemy(spawnables[i]);
             }
         }
+        foreach (var s in spawnPoints)
+            s.SubtractFromCooldown(Time.deltaTime);
     }
 
     void SpawnEnemy(Spawnable spawnable)
     {
         for (int i = 0; i < spawnable.spawnAmount; i++)
         {
-            var pos = spawnPoints[Random.Range(0, spawnPoints.Count)].position;
+            SpawnPointHelper selectedSpawnPoint = null;
+            //change to coroutine?
+            while (true)
+            {
+                selectedSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+                if (selectedSpawnPoint.IsReady())
+                {
+                    selectedSpawnPoint.ResetCooldown();
+                    break;
+                }
+                else
+                    Debug.Log("Cooldown");
+            }
+            var pos = selectedSpawnPoint.point.position;
             pos.z = 0.0f;
             GameObject.Instantiate(spawnable.prefab, pos, transform.rotation);
         }
