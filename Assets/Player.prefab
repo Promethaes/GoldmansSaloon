@@ -46,7 +46,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 2
+  m_Radius: 1.62
 --- !u!1 &74312361704254757
 GameObject:
   m_ObjectHideFlags: 0
@@ -170,7 +170,7 @@ GameObject:
   - component: {fileID: 3205432912533083028}
   - component: {fileID: 2552423117378915917}
   m_Layer: 0
-  m_Name: AmmoText
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1152,7 +1152,7 @@ MonoBehaviour:
   _bulletTimePitchCurveSpeed: 10
   _bulletTimeSlowPitch: 80
   _bulletTimeNormalPitch: 100
-  _currentGun: 1
+  _currentGun: 0
   invinceTime: 7
   rigidbody2D: {fileID: 6813931906347582663}
   bulletTimeSlider: {fileID: 0}
@@ -3406,7 +3406,7 @@ GameObject:
   - component: {fileID: 3506774963584665131}
   - component: {fileID: 894388209676289075}
   m_Layer: 0
-  m_Name: AmmoText
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3734,6 +3734,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -1
       objectReference: {fileID: 0}
+    - target: {fileID: 6720899794681643084, guid: b613236365e1e5b42b8f1bf9e103db7a,
+        type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 40f5efd6a20ed9f41980a65bfdbc0954, type: 3}
     - target: {fileID: 8029652464772198038, guid: b613236365e1e5b42b8f1bf9e103db7a,
         type: 3}
       propertyPath: m_TagString
