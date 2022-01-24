@@ -6,8 +6,10 @@ using UnityEngine.Events;
 public class EntityHealth : MonoBehaviour
 {
     [SerializeField] int maxHP = 3;
+    [SerializeField] int scoreValue = 0;
     public UnityEvent OnTakeDamage = new UnityEvent();
     public UnityEvent OnDie = new UnityEvent();
+
 
     int _hp = 0;
 
@@ -38,8 +40,13 @@ public class EntityHealth : MonoBehaviour
         return _hp;
     }
 
-    public void FullHeal(){
+    public void FullHeal()
+    {
         _hp = maxHP;
     }
 
+    public int GetScoreValue()
+    {
+        return scoreValue;
+    }
 }

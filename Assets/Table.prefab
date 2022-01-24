@@ -273,16 +273,19 @@ MonoBehaviour:
       type: 3}
     potionSound: {fileID: 3454350957018440446}
     chance: 75
+    scoreValue: 100
   invince:
     tablePotionSprite: {fileID: 21300000, guid: 12ab154dc17e00845a9915dfbdc78f9b,
       type: 3}
     potionSound: {fileID: 6555434876961839660}
     chance: 15
+    scoreValue: 300
   revive:
     tablePotionSprite: {fileID: 21300000, guid: cedd92263517bcd41948cdcc675f06df,
       type: 3}
     potionSound: {fileID: 1260877397785855680}
     chance: 10
+    scoreValue: 500
   knockedOver: {fileID: 7876994025622705927}
   knockedOverSprite: {fileID: 21300000, guid: 7f36b96a0690a7e478e63fb99933e156, type: 3}
 --- !u!114 &5742262179715666999
@@ -298,6 +301,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 3
+  scoreValue: 0
   OnTakeDamage:
     m_PersistentCalls:
       m_Calls:

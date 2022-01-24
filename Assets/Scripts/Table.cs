@@ -18,6 +18,7 @@ public class Table : MonoBehaviour
         public Sprite tablePotionSprite;
         public AudioSource potionSound;
         public float chance = 0.0f;
+        public int scoreValue = 100;
     }
     public float chanceToBePotionTable = 25.0f;
     public PotionHelper heal;
@@ -66,14 +67,18 @@ public class Table : MonoBehaviour
             return;
 
         var pc = other.gameObject.GetComponent<PlayerController>();
-        if (!pc.IsKicking())
+        if (!pc.IsKicking() || isKnockedOver)
             return;
-        if (!isKnockedOver)
+
+        knockedOver.Play();
+        GetComponent<SpriteRenderer>().sprite = knockedOverSprite;
+        isKnockedOver = true;
+        if (selectedHelper != null)
         {
-            knockedOver.Play();
-            GetComponent<SpriteRenderer>().sprite = knockedOverSprite;
-            isKnockedOver = true;
+            pc.AddScore(selectedHelper.scoreValue);
+            selectedHelper.potionSound.Play();
         }
+
         switch (potionType)
         {
             case PotionType.Heal:
