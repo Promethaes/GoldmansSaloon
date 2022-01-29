@@ -4,15 +4,25 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class SceneNavigation : MonoBehaviour
 {
-    public void ToGameScene(){
-        SceneManager.LoadSceneAsync("GameScene");
+    [SerializeField] float sceneLoadWaitTime = 1.0f;
+    IEnumerator WaitToTransition(string name)
+    {
+        yield return new WaitForSeconds(sceneLoadWaitTime);
+        SceneManager.LoadSceneAsync(name);
+    }
+    
+    public void ToGameScene()
+    {
+        StartCoroutine(WaitToTransition("GameScene"));
     }
 
-    public void ToMenuScene(){
-        SceneManager.LoadSceneAsync("SampleScene");
+    public void ToMenuScene()
+    {
+        StartCoroutine(WaitToTransition("SampleScene"));
     }
 
-    public void ExitApplication(){
+    public void ExitApplication()
+    {
         Application.Quit();
     }
 }

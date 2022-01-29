@@ -27,7 +27,7 @@ public class Table : MonoBehaviour
     public AudioSource knockedOver;
     public Sprite knockedOverSprite;
 
-    PotionType potionType = PotionType.None;
+    [HideInInspector] public PotionType potionType = PotionType.None;
     PotionHelper selectedHelper = null;
     bool isKnockedOver = false;
     private void OnEnable()
@@ -63,36 +63,35 @@ public class Table : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        if (!other.gameObject.CompareTag("Player"))
+        if (!other.gameObject.CompareTag("PTable"))
             return;
 
         var pc = other.gameObject.GetComponent<PlayerController>();
         if (!pc.IsKicking() || isKnockedOver)
             return;
 
-        knockedOver.Play();
-        GetComponent<SpriteRenderer>().sprite = knockedOverSprite;
         isKnockedOver = true;
         if (selectedHelper != null)
         {
             pc.AddScore(selectedHelper.scoreValue);
             selectedHelper.potionSound.Play();
         }
+    }
 
-        switch (potionType)
+    public int GetKicked()
+    {
+        if (isKnockedOver)
+            return 0;
+        isKnockedOver = true;
+        knockedOver.Play();
+        GetComponent<SpriteRenderer>().sprite = knockedOverSprite;
+        if (selectedHelper != null)
         {
-            case PotionType.Heal:
-                pc.Heal();
-                break;
-            case PotionType.Invince:
-                pc.Invince();
-                break;
-            case PotionType.Revive:
-                pc.ReviveOther();
-                break;
-            default:
-                break;
+            selectedHelper.potionSound.Play();
+            return selectedHelper.scoreValue;
         }
+        return 0;
+
     }
 
     public void OnDie()

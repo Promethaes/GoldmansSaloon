@@ -18,6 +18,8 @@ public class BulletInfo : MonoBehaviour
     }
     private void Update()
     {
+        if (_lifetime == -10.0f)
+            return;
         if (_lifetime > 0.0f)
             _lifetime -= Time.deltaTime;
         if (_lifetime < 0.0f)

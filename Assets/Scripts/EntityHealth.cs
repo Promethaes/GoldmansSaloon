@@ -49,4 +49,9 @@ public class EntityHealth : MonoBehaviour
     {
         return scoreValue;
     }
+
+    public int GetMaxHP()
+    {
+        return maxHP;
+    }
 }

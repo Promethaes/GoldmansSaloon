@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour
         }
         public void TakeGoldenHearts(int currentHP, Sprite fullHeart, Sprite brokenHeart, Sprite goldenHeart)
         {
-            OnHPChange(currentAmmoUI, fullHeart, brokenHeart);
+            OnHPChange(currentHP, fullHeart, brokenHeart);
         }
     }
 
@@ -82,6 +82,15 @@ public class PlayerController : MonoBehaviour
         Base,
         Shotgun,
         Gattling,
+    }
+
+    public enum Sounds
+    {
+        Male_Death,
+        Male_Hurt,
+        Female_Death,
+        Female_Hurt,
+        BulletTime,
     }
 
 
@@ -123,6 +132,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("0. Base Gun\n1. Shotgun\n2. Gattling Gun")]
     public List<Gun> guns;
     [SerializeField] AudioMixer _masterMix;
+    [SerializeField] List<AudioSource> sounds = new List<AudioSource>();
 
     bool _shooting = false;
 
@@ -257,11 +267,11 @@ public class PlayerController : MonoBehaviour
         {
             case 1:
                 p1UiInfo.ammoText.text = guns[(int)_currentGun].GetCurrentAmmo().ToString();
-                p1UiInfo.scoreText.text ="SCORE: " + currentScore.ToString();
+                p1UiInfo.scoreText.text = "SCORE: " + currentScore.ToString();
                 break;
             case 2:
                 p2UiInfo.ammoText.text = guns[(int)_currentGun].GetCurrentAmmo().ToString();
-                p1UiInfo.scoreText.text ="SCORE: " + currentScore.ToString();
+                p1UiInfo.scoreText.text = "SCORE: " + currentScore.ToString();
                 break;
 
         }
@@ -330,15 +340,21 @@ public class PlayerController : MonoBehaviour
     public void Heal()
     {
         hp++;
-        switch (_playerNumber)
+        IEnumerator ChangeHP()
         {
-            case 1:
-                p1UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
-                break;
-            case 2:
-                p2UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
-                break;
+            while (_invincePotion)
+                yield return null;
+            switch (_playerNumber)
+            {
+                case 1:
+                    p1UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                    break;
+                case 2:
+                    p2UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                    break;
+            }
         }
+        StartCoroutine(ChangeHP());
     }
 
     public void Invince()
@@ -396,15 +412,28 @@ public class PlayerController : MonoBehaviour
         {
             case 1:
                 p1UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                sounds[Sounds.Male_Hurt.GetHashCode()].Play();
                 break;
             case 2:
                 p2UiInfo.OnHPChange(hp, fullHeart, brokenHeart);
+                sounds[Sounds.Female_Hurt.GetHashCode()].Play();
                 break;
         }
         //TODO: insert UI meddling here
         if (hp <= 0)
         {
             gameObject.transform.Rotate(new Vector3(0.0f, 0.0f, 90.0f));
+
+            switch (_playerNumber)
+            {
+                case 1:
+                    sounds[Sounds.Male_Death.GetHashCode()].Play();
+                    break;
+                case 2:
+                    sounds[Sounds.Female_Death.GetHashCode()].Play();
+                    break;
+            }
+
             //find a way to check if all players are dead
             //then,
             //_bulletTime = false;
@@ -421,6 +450,7 @@ public class PlayerController : MonoBehaviour
     public void SetCurrentGun(GunEnum gun)
     {
         _currentGun = gun;
+        guns[(int)_currentGun].ResetAmmo();
         switch (_playerNumber)
         {
             case 1:
@@ -434,7 +464,6 @@ public class PlayerController : MonoBehaviour
 
                 p1UiInfo.gunSprites[(int)_currentGun].gameObject.SetActive(true);
 
-                guns[(int)_currentGun].ResetAmmo();
                 break;
             case 2:
                 if (guns[(int)_currentGun].maxAmmo == -1)
@@ -467,6 +496,7 @@ public class PlayerController : MonoBehaviour
             _bulletTime = true;
             Time.timeScale = timeScaleChange;
             Time.fixedDeltaTime = timeScaleChange * 0.02f;
+            sounds[Sounds.BulletTime.GetHashCode()].Play();
         }
         else
         {
@@ -509,12 +539,36 @@ public class PlayerController : MonoBehaviour
             force = force.normalized;
 
             var otherRigid = other.gameObject.GetComponent<Rigidbody2D>();
+            var otherTable = other.gameObject.GetComponent<Table>();
+
 
             if (_kicking)
+            {
                 otherRigid.AddForce(force * tableKnockbackScalar * otherRigid.mass, ForceMode2D.Impulse);
+                int score = otherTable.GetKicked();
+                if (score > 0)
+                    AddScore(score);
+                else return;
+                switch (otherTable.potionType)
+                {
+                    case Table.PotionType.Heal:
+                        Heal();
+                        break;
+                    case Table.PotionType.Invince:
+                        Invince();
+                        break;
+                    case Table.PotionType.Revive:
+                        ReviveOther();
+                        break;
+                    default:
+                        break;
+                }
+            }
             else
-                otherRigid.velocity = Vector2.zero;
-            return;
+            {
+
+                otherRigid.AddForce(force * otherRigid.mass, ForceMode2D.Impulse);
+            }
         }
     }
 

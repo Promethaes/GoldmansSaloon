@@ -48,7 +48,7 @@ public class ScrollingCamera : MonoBehaviour
     }
 
     //flip camera direction
-    void OnGoldmanSpawn()
+    public void OnGoldmanSpawn()
     {
         IEnumerator Transition()
         {

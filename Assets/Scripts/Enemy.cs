@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
         Basic,
         FollowPlayerLoose,
         FollowPlayerExactly,
+        Goldman,
         [Tooltip("This class will NOT call gun.shoot")]
         HandledExternally
     }
@@ -28,8 +29,14 @@ public class Enemy : MonoBehaviour
     public Gun gun;
     [Tooltip("Only used when ShootType is set to FollowPlayerExactly.")]
     public Transform bulletStartPoint;
-    public GameObject deathParticles;
     public AudioSource deathSound;
+    public List<GameObject> goldmanBulletStartPoints = new List<GameObject>();
+    public AnimationCurve goldmanCurve;
+    public Transform goldmanTracker;
+    public AudioSource goldmanNyeh;
+    public Gun goldmanGunOne;
+    public Gun goldmanGunTwo;
+    [SerializeField] AudioSource spawnSound = null;
 
     PlayerController[] _players = null;
 
@@ -37,14 +44,23 @@ public class Enemy : MonoBehaviour
 
     private void OnEnable()
     {
+        if (spawnSound)
+            spawnSound.Play();
         health = GetComponent<EntityHealth>();
         health.FullHeal();
+        bool CloseEnough()
+        {
+            var direction = FindClosestPlayer().position - transform.position;
+            return Mathf.Abs(direction.y) <= 8.0f;
+        }
         IEnumerator BasicShoot()
         {
             gun.SetGunOrientation(Gun.GunOrientation.Forward);
             while (health.GetCurrentHP() > 0)
             {
                 yield return new WaitForEndOfFrame();
+                if (!CloseEnough())
+                    continue;
                 gun.Shoot();
             }
         }
@@ -56,6 +72,8 @@ public class Enemy : MonoBehaviour
                 yield return new WaitForEndOfFrame();
 
                 var direction = FindClosestPlayer().position - transform.position;
+                if (!CloseEnough())
+                    continue;
                 direction = direction.normalized;
 
                 if (direction.x > 0.0f)
@@ -73,12 +91,72 @@ public class Enemy : MonoBehaviour
                 yield return new WaitForEndOfFrame();
 
                 var direction = FindClosestPlayer().position - transform.position;
+                if (!CloseEnough())
+                    continue;
                 direction = direction.normalized;
                 if (direction.y > bulletYPosLimit)
                     continue;
                 bulletStartPoint.position = transform.position + direction * bulletStartPointDistanceScalar;
                 gun.Shoot();
             }
+        }
+
+        IEnumerator GoldmanShoot()
+        {
+            gun = goldmanGunOne;
+            gun.SetGunOrientation(Gun.GunOrientation.Forward);
+            var originalPos = goldmanBulletStartPoints;
+
+            void PhaseOne()
+            {
+                gun = goldmanGunOne;
+                //foreach (var g in gun.spawnLocationsForward)
+                //{
+                //    int sign = Random.Range(0, 101) > 50 ? 1 : -1;
+                //    float x = sign * goldmanCurve.Evaluate(Random.Range(0.0f, 1.0f));
+                //    float y = -goldmanCurve.Evaluate(Random.Range(0.0f, 1.0f));
+                //    g.transform.position = g.transform.position + new Vector3(x, y)*2.0f;
+                //}
+                gun.Shoot();
+                gun.spawnLocationsForward = originalPos;
+            }
+
+            void PhaseTwo()
+            {
+                gun = goldmanGunTwo;
+                var direction = goldmanTracker.position - transform.position;
+                direction = direction.normalized;
+                bulletStartPoint.position = transform.position + direction * bulletStartPointDistanceScalar;
+                gun.Shoot();
+            }
+
+            //phase 1
+            while (health.GetCurrentHP() > 75)
+            {
+                yield return new WaitForEndOfFrame();
+                PhaseOne();
+            }
+            //phase 2
+            while (health.GetCurrentHP() > 50)
+            {
+                yield return new WaitForEndOfFrame();
+                PhaseTwo();
+            }
+            //change sprites
+            goldmanNyeh.Play();
+            goldmanGunOne.rateOfFire /= 2.0f;
+            goldmanGunTwo.rateOfFire /= 2.0f;
+            goldmanTracker.GetComponent<GoldmanTracker>().lerpSpeed = 2.0f;
+            while (health.GetCurrentHP() > 0)
+            {
+                yield return new WaitForEndOfFrame();
+                bool phase = Random.Range(0, 101) > 50 ? true : false;
+                if (phase)
+                    PhaseOne();
+                else
+                    PhaseTwo();
+            }
+
         }
 
         //select method of shooting
@@ -92,6 +170,9 @@ public class Enemy : MonoBehaviour
                 break;
             case ShootType.FollowPlayerExactly:
                 StartCoroutine(FollowPlayerExactlyShoot());
+                break;
+            case ShootType.Goldman:
+                StartCoroutine(GoldmanShoot());
                 break;
             case ShootType.HandledExternally:
                 break;

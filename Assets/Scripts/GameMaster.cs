@@ -9,6 +9,7 @@ public class GameMaster : MonoBehaviour
     public UnityEvent OnAllPlayersDead;
     public UnityEvent OnStartCounterFinished;
     public UnityEvent OnBeginGame;
+    public UnityEvent OnGoldmanSpawn;
     List<PlayerController> players = new List<PlayerController>();
 
     bool _allPlayersDead = false;
@@ -34,8 +35,15 @@ public class GameMaster : MonoBehaviour
             OnStartCounterFinished.Invoke();
             yield return new WaitForSeconds(0.5f);
             OnBeginGame.Invoke();
+            StartCoroutine(GoldmanCounter());
         }
         StartCoroutine(StartCounter());
+
+        IEnumerator GoldmanCounter()
+        {
+            yield return new WaitForSeconds(120.0f);
+            OnGoldmanSpawn.Invoke();
+        }
 
         OnAllPlayersDead.AddListener(Master_OnAllPlayersDead);
         OnBeginGame.AddListener(Master_OnBeginGame);
@@ -54,6 +62,10 @@ public class GameMaster : MonoBehaviour
         _allPlayersDead = true;
         foreach (var p in players)
             p.GetComponent<HighscoreManager>().OnAllPlayersDead();
+        OnAllPlayersDead.Invoke();
+    }
+
+    public void GoldmanDead(){
         OnAllPlayersDead.Invoke();
     }
 }
